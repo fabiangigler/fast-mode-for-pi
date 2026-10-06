@@ -26,19 +26,19 @@ try {
 	assert.equal(statuses.at(-1), "fast mode on", "persisted state overrides the environment default");
 
 	const request = (payload: unknown) => handlers.get("before_provider_request")({ payload }, ctx);
-	for (const [provider, api] of [
-		["openai", "openai-responses"],
-		["openai", "openai-completions"],
-		["openai-codex", "openai-codex-responses"],
+	for (const [provider, api, tier] of [
+		["openai", "openai-responses", "fast"],
+		["openai", "openai-completions", "fast"],
+		["openai-codex", "openai-codex-responses", "priority"],
 	]) {
 		for (const id of ["gpt-5.4", "gpt-5.5", "gpt-5.6-sol", "gpt-6-sol", "gpt-6.1-sol", "gpt-4o", "o3", "future-model"]) {
 			ctx.model = { provider, api, id };
 			const payload = { model: id, service_tier: "auto", input: "unchanged" };
 			assert.equal(request(payload), payload);
-			assert.deepEqual(payload, { model: id, service_tier: "fast", input: "unchanged" }, `${provider}/${id}`);
+			assert.deepEqual(payload, { model: id, service_tier: tier, input: "unchanged" }, `${provider}/${id}`);
 		}
 	}
-	console.log("✓ All OpenAI/Codex model IDs request service_tier=fast, including Chat Completions");
+	console.log("✓ All model IDs request fast on the public OpenAI API and priority on Codex");
 
 	for (const [provider, api] of [
 		["openrouter", "openai-completions"],
@@ -63,7 +63,7 @@ try {
 	await commands.get("fast").handler("on", ctx);
 	const fastPayload = {};
 	request(fastPayload);
-	assert.deepEqual(fastPayload, { service_tier: "fast" });
+	assert.deepEqual(fastPayload, { service_tier: "priority" }, "Codex rejects the public API's fast alias, including on gpt-6.1-sol");
 	assert.deepEqual(persisted, [
 		{ customType: "fast-mode-state", data: { enabled: false } },
 		{ customType: "fast-mode-state", data: { enabled: true } },

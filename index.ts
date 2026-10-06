@@ -2,7 +2,6 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 
 declare const process: { env: Record<string, string | undefined> };
 
-const FAST_SERVICE_TIER = "fast";
 const OPENAI_PROVIDERS = new Set(["openai", "openai-codex"]);
 const SERVICE_TIER_APIS = new Set(["openai-codex-responses", "openai-responses", "openai-completions"]);
 const COMMAND_OPTIONS = ["on", "off", "toggle", "status"];
@@ -94,7 +93,9 @@ const fastModeExtension = (pi: ExtensionAPI) => {
 
 		if (!enabled) return;
 
-		payload.service_tier = FAST_SERVICE_TIER;
+		// The public API accepts "fast", but the ChatGPT/Codex backend still
+		// requires "priority" for Fast mode (including gpt-6.1-sol).
+		payload.service_tier = ctx.model?.api === "openai-codex-responses" ? "priority" : "fast";
 		return payload;
 	});
 };

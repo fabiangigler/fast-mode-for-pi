@@ -2,13 +2,15 @@
 
 A small Pi extension that adds a `/fast` command for OpenAI/Codex Fast service tier requests.
 
-When enabled, every OpenAI/Codex Responses or Chat Completions request gets:
+When enabled, public OpenAI Responses and Chat Completions requests get:
 
 ```json
 {
   "service_tier": "fast"
 }
 ```
+
+ChatGPT/Codex requests (`openai-codex-responses`) use `"service_tier": "priority"` instead. This enables the same Fast mode; that backend rejects the public API's `"fast"` alias, including on `gpt-6.1-sol`.
 
 ## Install
 
