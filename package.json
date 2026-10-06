@@ -1,11 +1,15 @@
 {
   "name": "fast-mode-for-pi",
   "version": "0.1.0",
-  "description": "A Pi extension that toggles OpenAI priority service tier requests.",
+  "description": "A Pi extension that toggles Fast service tier requests for all OpenAI/Codex models.",
+  "scripts": {
+    "test": "node test.ts"
+  },
   "type": "module",
   "license": "MIT",
   "files": [
     "index.ts",
+    "test.ts",
     "README.md",
     "LICENSE"
   ],

@@ -1,12 +1,12 @@
 # fast-mode-for-pi
 
-A small Pi extension that adds a `/fast` command for OpenAI/Codex priority service tier requests.
+A small Pi extension that adds a `/fast` command for OpenAI/Codex Fast service tier requests.
 
-When enabled, supported OpenAI Responses API requests get:
+When enabled, every OpenAI/Codex Responses or Chat Completions request gets:
 
 ```json
 {
-  "service_tier": "priority"
+  "service_tier": "fast"
 }
 ```
 
@@ -54,27 +54,19 @@ Other extensions can read the same text from:
 globalThis.__piFastModeStatus
 ```
 
-## Supported models
+## Model coverage
 
-By default, fast mode is applied only when the current model is one of:
-
-```text
-gpt-5.4
-gpt-5.5
-```
-
-and the provider API is one of:
+Fast mode is requested for all model IDs under Pi's `openai` and `openai-codex` providers, using these APIs:
 
 ```text
 openai-codex-responses
 openai-responses
+openai-completions
 ```
 
-Override the model allowlist with:
+There is no model allowlist; `PI_FAST_MODE_MODELS` is no longer used. Other providers, including OpenAI-compatible third-party services, are left untouched.
 
-```bash
-export PI_FAST_MODE_MODELS="gpt-5.4,gpt-5.5,another-model"
-```
+This requests Fast mode; it does not guarantee the backend grants it. Models or accounts without Fast support may reject the request or process it at a different tier. Use `/fast off` if needed.
 
 Enable fast mode by default with:
 
@@ -88,6 +80,14 @@ The enabled/disabled state is persisted in the Pi session, so it survives `/relo
 
 ## Notes
 
-- The extension only modifies requests for the supported OpenAI Responses APIs.
+- The extension modifies OpenAI/Codex Responses and Chat Completions request bodies, not HTTP headers.
 - When fast mode is off, it leaves provider payloads untouched.
-- Unsupported models keep using Pi's normal provider behavior.
+- It does not silently fall back when the server rejects Fast mode.
+
+## Tests
+
+```bash
+pnpm test
+```
+
+Tests run the extension hooks in isolation without making API requests.
