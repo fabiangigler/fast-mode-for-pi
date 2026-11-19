@@ -1,16 +1,14 @@
 # fast-mode-for-pi
 
-A small Pi extension that adds a `/fast` command for OpenAI/Codex Fast service tier requests.
+A small Pi extension that adds a `/fast` command for OpenAI/Codex Fast and Ultrafast service tier requests.
 
-When enabled, public OpenAI Responses and Chat Completions requests get:
+| Command | Public OpenAI `service_tier` | ChatGPT/Codex `service_tier` |
+| --- | --- | --- |
+| `/fast on` | `"fast"` | `"priority"` |
+| `/fast ultrafast` | `"ultrafast"` | `"ultrafast"` |
+| `/fast off` | Payload unchanged | Payload unchanged |
 
-```json
-{
-  "service_tier": "fast"
-}
-```
-
-ChatGPT/Codex requests (`openai-codex-responses`) use `"service_tier": "priority"` instead. This enables the same Fast mode; that backend rejects the public API's `"fast"` alias, including on `gpt-6.1-sol`.
+Ultrafast is opt-in. Existing Fast settings and sessions are not automatically upgraded.
 
 ## Install
 
@@ -32,10 +30,11 @@ Then reload Pi:
 /fast
 ```
 
-Toggles fast mode.
+Toggles ordinary Fast on/off. If Ultrafast is active, toggling turns it off; the next toggle enables ordinary Fast, not Ultrafast.
 
 ```text
 /fast on
+/fast ultrafast
 /fast off
 /fast toggle
 /fast status
@@ -47,6 +46,7 @@ The extension also publishes a Pi status entry named `fast-mode` with one of:
 
 ```text
 fast mode on
+ultrafast mode on
 fast mode off
 ```
 
@@ -58,7 +58,7 @@ globalThis.__piFastModeStatus
 
 ## Model coverage
 
-Fast mode is requested for all model IDs under Pi's `openai` and `openai-codex` providers, using these APIs:
+The selected tier is requested for all model IDs under Pi's `openai` and `openai-codex` providers, using these APIs:
 
 ```text
 openai-codex-responses
@@ -68,9 +68,11 @@ openai-completions
 
 There is no model allowlist; `PI_FAST_MODE_MODELS` is no longer used. Other providers, including OpenAI-compatible third-party services, are left untouched.
 
-This requests Fast mode; it does not guarantee the backend grants it. Models or accounts without Fast support may reject the request or process it at a different tier. Use `/fast off` if needed.
+The backend determines model/API/account eligibility. [Pro $200 Ultrafast access currently includes GPT-6.2 Sol](https://learn.chatgpt.com/docs/whats-new/gpt-62-astra-sol); other plans have different eligibility. The [Ultrafast API guide](https://developers.openai.com/api/docs/guides/ultrafast-mode) documents supported Responses models.
 
-Enable fast mode by default with:
+Fast and Ultrafast use more plan allowance or API spend. Unsupported requests may be rejected or processed at another tier by the backend. The extension never retries them at a lower tier. Its status shows the **requested** mode, not confirmation of the served or billed tier. Use `/fast on` or `/fast off` to change it.
+
+Enable ordinary Fast (not Ultrafast) by default with:
 
 ```bash
 export PI_FAST_MODE=true
@@ -78,13 +80,14 @@ export PI_FAST_MODE=true
 
 ## State
 
-The enabled/disabled state is persisted in the Pi session, so it survives `/reload` and resumed sessions.
+The selected mode is persisted in the Pi session, so it survives `/reload` and resumed sessions. Older boolean state records restore ordinary Fast or off.
 
 ## Notes
 
 - The extension modifies OpenAI/Codex Responses and Chat Completions request bodies, not HTTP headers.
 - When fast mode is off, it leaves provider payloads untouched.
-- It does not silently fall back when the server rejects Fast mode.
+- It does not silently fall back when the server rejects Fast or Ultrafast mode.
+- Pi's displayed cost estimates may not include Ultrafast pricing. OpenAI's usage/billing records are authoritative.
 
 ## Tests
 

@@ -1,7 +1,7 @@
 {
   "name": "fast-mode-for-pi",
-  "version": "0.1.0",
-  "description": "A Pi extension that toggles Fast service tier requests for all OpenAI/Codex models.",
+  "version": "0.2.0",
+  "description": "A Pi extension that selects Fast or Ultrafast service tier requests for OpenAI/Codex models.",
   "scripts": {
     "test": "node test.ts"
   },
